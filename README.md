@@ -62,8 +62,8 @@ On the 3 sample users the pipeline reproduces the 2-week means with MAE 0.010
 ## Optional: score the unknown sentences with a local LLM (Mac + Ollama)
 
 `care_score/llm_lexicon.py` replaces the hand-mapped table with answers from a local model.
-It is an offline step: it writes into `lexicon.json`, and the predictor / notebook never call
-a model. Each unknown sentence is sent with its domain's full tier ladder from the sample, the
+It is an offline step: it writes a separate `lexicon_<model>.json` per model (the hand-mapped
+values are kept inside as `manual` for reference), and the predictor / notebook never call a model. Each unknown sentence is sent with its domain's full tier ladder from the sample, the
 relevant 利用者特徴 profiles, and the hard bounds implied by that day's 注意点 flags; several
 votes are averaged (midpoint of a low..high answer), then clipped to the bounds.
 
@@ -78,16 +78,23 @@ python -m care_score.llm_lexicon --models qwen2.5:14b --validate
 # 2) dry run: LLM vs hand-mapped score for the 15 test-only sentences
 python -m care_score.llm_lexicon --models qwen2.5:14b
 
-# 3) write into lexicon.json (hand-mapped values are kept as `manual` for reference), then re-predict
+# 3) save that model's answers as its own lexicon (lexicon.json stays the hand-mapped baseline)
+python -m care_score.llm_lexicon --models qwen2.5:14b --write      # -> care_score/lexicon_qwen2.5-14b.json
+
+# 4) predict with it into a separate folder, so each model's submission can be compared later
+python -m care_score.predict --lexicon care_score/lexicon_qwen2.5-14b.json \
+    --records   data/test_7users/care_hackathon_student_records_7users_14days.csv \
+    --summaries data/test_7users/care_hackathon_2week_summaries_7users.csv \
+    --out submission/qwen2.5-14b
+
+# several models at once are averaged into one file: lexicon_qwen2.5-14b+qwen2.5-7b.json
 python -m care_score.llm_lexicon --models qwen2.5:14b,qwen2.5:7b --votes 3 --write
-python -m care_score.evaluate
-python -m care_score.predict --records data/test_7users/care_hackathon_student_records_7users_14days.csv \
-    --summaries data/test_7users/care_hackathon_2week_summaries_7users.csv --out submission
 ```
 
-Answers are cached in `care_score/llm_cache.json`. `python -m care_score.build_lexicon` restores
-the hand-mapped lexicon. To use an LLM-scored lexicon on the iPad, copy `lexicon.json` next to the
-notebook; it is picked up automatically.
+Answers are cached in `care_score/llm_cache.json` after every call, so re-running `--write` for a model
+is free and an interrupted run (timeout, battery, Ctrl-C) resumes where it stopped.
+`lexicon.json` is never modified by this step. To use an LLM-scored lexicon on the iPad, copy
+`lexicon_<model>.json` next to the notebook as `lexicon.json`; it is picked up automatically.
 
 ## Layout
 

@@ -1,11 +1,13 @@
 """Fill lexicon gaps with a local LLM (Ollama) instead of the hand-written MANUAL_ENTRIES.
 
 The LLM is an *offline* step: it scores each unknown sentence once, the answers are
-written into lexicon.json, and predict.py / the notebook never call a model.
+written into a per-model lexicon_<model>.json (lexicon.json itself is left as the hand-mapped
+baseline), and predict.py / the notebook never call a model.
 
     # on a Mac with Ollama running (brew install ollama; ollama pull qwen2.5:14b)
     python -m care_score.llm_lexicon --models qwen2.5:14b --validate      # how well does it recover the sample scale?
-    python -m care_score.llm_lexicon --models qwen2.5:14b --write         # score the test-only sentences, update lexicon.json
+    python -m care_score.llm_lexicon --models qwen2.5:14b --write         # -> care_score/lexicon_qwen2.5-14b.json
+    python -m care_score.predict --lexicon care_score/lexicon_qwen2.5-14b.json --records ... --out submission/qwen2.5-14b
 
 For every unknown sentence the model receives
   * the domain (from its slot position; trailing sentences may be 介助負担 or リスク),
@@ -15,12 +17,14 @@ For every unknown sentence the model receives
 and must answer JSON {"domain", "score_low", "score_high", "reason"}.  Several votes
 (different seeds / models) are averaged; the midpoint of low..high is used, which is
 the MAE-optimal choice when two tiers are equally plausible.  Answers are cached in
-care_score/llm_cache.json so re-runs are free.
+care_score/llm_cache.json after every call, so re-runs are free and an interrupted run resumes
+where it stopped.
 """
 from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import re
 import statistics
@@ -53,7 +57,9 @@ class OllamaClient:
         self.model, self.host, self.timeout = model, host.rstrip("/"), timeout
 
     def chat(self, system: str, user: str, seed: int, temperature: float) -> str:
-        body = {"model": self.model, "stream": False, "format": "json",
+        # think=False: qwen3+ reason before answering by default and would burn num_predict on it;
+        # models without a thinking mode (qwen2.5 etc.) ignore the field.
+        body = {"model": self.model, "stream": False, "format": "json", "think": False,
                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
                 "options": {"temperature": temperature, "seed": seed, "num_predict": 400}}
         req = urllib.request.Request(f"{self.host}/api/chat", data=json.dumps(body).encode(),
@@ -63,6 +69,24 @@ class OllamaClient:
 
     def __str__(self) -> str:
         return f"ollama:{self.model}"
+
+
+class PersistentCache(dict):
+    """dict that rewrites its JSON file after every new answer (atomically), so an interrupted
+    run (timeout, power loss, Ctrl-C) keeps everything already scored."""
+
+    def __init__(self, path: Path):
+        super().__init__(json.loads(path.read_text(encoding="utf-8")) if path.exists() else {})
+        self.path = path
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        self.flush()
+
+    def flush(self) -> None:
+        tmp = self.path.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(self, ensure_ascii=False, indent=0), encoding="utf-8")
+        tmp.replace(self.path)
 
 
 class FakeClient:
@@ -168,6 +192,13 @@ def parse_answer(text: str, allowed: list[str]) -> tuple[str, float, float, str]
     return dom, max(0, min(5, lo)), max(0, min(5, hi)), str(obj.get("reason", ""))
 
 
+def cache_key(client, k: int, temp: float, prompt: str, sentence: str) -> str:
+    # hashlib, not hash(): Python's str hash is randomised per process, which made every new
+    # run miss the cache and re-query the model.
+    digest = hashlib.sha1(prompt.encode("utf-8")).hexdigest()[:12]
+    return f"{client}|{k}|{temp}|{digest}|{sentence}"
+
+
 def score_sentence(sentence: str, ctx: dict, lexicon: dict, clients: list, votes: int, cache: dict,
                    hide: str | None = None) -> dict:
     prompt = make_prompt(sentence, ctx, lexicon, hide)
@@ -175,7 +206,7 @@ def score_sentence(sentence: str, ctx: dict, lexicon: dict, clients: list, votes
     for client in clients:
         for k in range(votes):
             temp = 0.0 if votes == 1 else 0.5
-            key = f"{client}|{k}|{temp}|{hash(prompt) & 0xFFFFFFFF}|{sentence}"
+            key = cache_key(client, k, temp, prompt, sentence)
             if key not in cache:
                 raw = client.chat(SYSTEM, prompt, seed=k + 1, temperature=temp)
                 cache[key] = raw
@@ -237,6 +268,11 @@ def fill(lexicon: dict, records_path: Path, summaries_path: Path | None, clients
     return results
 
 
+def model_slug(models: str) -> str:
+    """'qwen2.5:14b,elyza/swallow' -> 'qwen2.5-14b+elyza-swallow' (safe for a filename)."""
+    return "+".join(re.sub(r"[^0-9A-Za-z.]+", "-", m.strip()) for m in models.split(",") if m.strip())
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--models", default="qwen2.5:14b", help="comma-separated Ollama model names")
@@ -246,12 +282,15 @@ def main(argv=None) -> int:
     ap.add_argument("--summaries", type=Path, default=TEST_SUMMARIES)
     ap.add_argument("--validate", action="store_true", help="score the sample's own sentences with their entry hidden")
     ap.add_argument("--limit", type=int, help="with --validate: only the first N sentences")
-    ap.add_argument("--write", action="store_true", help="write LLM answers for unknown sentences into lexicon.json")
+    ap.add_argument("--write", action="store_true",
+                    help="write a lexicon with the LLM answers for unknown sentences (see --out)")
+    ap.add_argument("--out", type=Path, default=None,
+                    help="lexicon path for --write (default: care_score/lexicon_<model>.json, e.g. lexicon_qwen2.5-14b.json)")
     ap.add_argument("--no-cache", action="store_true")
     args = ap.parse_args(argv)
 
     clients = [OllamaClient(m.strip(), args.host) for m in args.models.split(",") if m.strip()]
-    cache = {} if args.no_cache or not CACHE_PATH.exists() else json.loads(CACHE_PATH.read_text(encoding="utf-8"))
+    cache = {} if args.no_cache else PersistentCache(CACHE_PATH)   # saved after every answer
     sample_lex = {s: v for s, v in build_sample_lexicon().items() if v["source"] == "sample_3users"}
 
     try:
@@ -268,13 +307,15 @@ def main(argv=None) -> int:
                     if s in MANUAL_ENTRIES:
                         res["manual"] = list(MANUAL_ENTRIES[s][:2])
                     lex[s] = res
-                LEXICON_PATH.write_text(json.dumps(lex, ensure_ascii=False, indent=1), encoding="utf-8")
-                print(f"\nwrote {LEXICON_PATH} ({len(lex)} sentences, {len(results)} from LLM)")
+                out = args.out or LEXICON_PATH.with_name(f"lexicon_{model_slug(args.models)}.json")
+                out.write_text(json.dumps(lex, ensure_ascii=False, indent=1), encoding="utf-8")
+                print(f"\nwrote {out} ({len(lex)} sentences, {len(results)} from LLM)")
+                print(f"use it with: python -m care_score.predict --lexicon {out} ...")
             else:
-                print("\n(dry run — add --write to update lexicon.json)")
+                print("\n(dry run — add --write to save a per-model lexicon)")
     finally:
         if not args.no_cache:
-            CACHE_PATH.write_text(json.dumps(cache, ensure_ascii=False, indent=0), encoding="utf-8")
+            cache.flush()
     return 0
 
 

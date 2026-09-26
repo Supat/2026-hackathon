@@ -80,8 +80,8 @@ def split_sentences(text: str) -> list[str]:
     return [s for s in text.split("。") if s]
 
 
-def load_lexicon() -> dict[str, dict]:
-    return json.loads(LEXICON_PATH.read_text(encoding="utf-8"))
+def load_lexicon(path: Path | None = None) -> dict[str, dict]:
+    return json.loads((path or LEXICON_PATH).read_text(encoding="utf-8"))
 
 
 def fit_fallback() -> dict[str, np.ndarray]:
@@ -242,11 +242,13 @@ def main(argv=None) -> int:
     ap.add_argument("--summaries", help="CSV with 利用者ID,期間開始,期間終了,利用者特徴,2週間サマリー (copied into the output)")
     ap.add_argument("--out", default="submission", help="output directory")
     ap.add_argument("--stem", default=None, help="output file prefix (default: derived from --records)")
+    ap.add_argument("--lexicon", type=Path, default=LEXICON_PATH,
+                    help="lexicon to use (default: care_score/lexicon.json; e.g. care_score/lexicon_qwen2.5-14b.json)")
     args = ap.parse_args(argv)
 
     records = list(csv.DictReader(open(args.records, encoding="utf-8")))
     summaries = list(csv.DictReader(open(args.summaries, encoding="utf-8"))) if args.summaries else []
-    lex = load_lexicon()
+    lex = load_lexicon(args.lexicon)
     w = fit_fallback()
     daily, warnings = predict(records, lex, w)
     agg = aggregate(daily)
