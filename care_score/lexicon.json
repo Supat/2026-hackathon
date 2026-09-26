@@ -1,0 +1,689 @@
+{
+ "食事は8割程度摂取": {
+  "domain": "食事",
+  "score": 4.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "入浴介助あり": {
+  "domain": "入浴",
+  "score": 3.0,
+  "n": 8,
+  "source": "sample_3users"
+ },
+ "午後のレクリエーションに参加": {
+  "domain": "運動",
+  "score": 3.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "排泄は見守りで可能": {
+  "domain": "排泄",
+  "score": 4.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "夜間は良眠": {
+  "domain": "睡眠",
+  "score": 5.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "レクリエーションに参加": {
+  "domain": "認知_意欲",
+  "score": 4.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "日常動作に介助が必要な場面が多い": {
+  "domain": "介助負担",
+  "score": 4.0,
+  "n": 8,
+  "source": "sample_3users"
+ },
+ "経過は概ね安定": {
+  "domain": "リスク",
+  "score": 1.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "食事は少量のみ": {
+  "domain": "食事",
+  "score": 2.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "声かけを行ったが入浴には至らなかった": {
+  "domain": "入浴",
+  "score": 1.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "体操参加を拒否": {
+  "domain": "運動",
+  "score": 1.0,
+  "n": 10,
+  "source": "sample_3users"
+ },
+ "排泄は一部介助": {
+  "domain": "排泄",
+  "score": 3.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "夜間覚醒は2回": {
+  "domain": "睡眠",
+  "score": 3.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "表情はやや硬い": {
+  "domain": "認知_意欲",
+  "score": 2.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "拒否があり対応に時間を要した": {
+  "domain": "介助負担",
+  "score": 5.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "食欲低下や水分摂取不足に注意": {
+  "domain": "リスク",
+  "score": 4.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "昼食は全量摂取": {
+  "domain": "食事",
+  "score": 5.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "移乗と洗体に介助を要した": {
+  "domain": "入浴",
+  "score": 3.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "衣服操作に一部介助を要した": {
+  "domain": "排泄",
+  "score": 3.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "一度目覚めたが再入眠できた": {
+  "domain": "睡眠",
+  "score": 4.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "声かけに対する反応は良好": {
+  "domain": "認知_意欲",
+  "score": 4.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "複数場面で介助を要した": {
+  "domain": "介助負担",
+  "score": 4.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "主食は半量程度、副食は少し残した": {
+  "domain": "食事",
+  "score": 3.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "体調を考慮し部分清拭とした": {
+  "domain": "入浴",
+  "score": 2.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "短時間のみレクリエーションに参加": {
+  "domain": "運動",
+  "score": 2.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "トイレ誘導後は見守りのみ": {
+  "domain": "排泄",
+  "score": 4.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "夜間に複数回目覚めた": {
+  "domain": "睡眠",
+  "score": 3.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "軽度の混乱はあるが指示理解可能": {
+  "domain": "認知_意欲",
+  "score": 3.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "経過観察が必要": {
+  "domain": "リスク",
+  "score": 3.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "少し残したが大部分は摂取": {
+  "domain": "食事",
+  "score": 4.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "歩行訓練15分を行った": {
+  "domain": "運動",
+  "score": 4.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "夜間覚醒なく休めていた": {
+  "domain": "睡眠",
+  "score": 5.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "介助下で入浴を実施": {
+  "domain": "入浴",
+  "score": 3.0,
+  "n": 9,
+  "source": "sample_3users"
+ },
+ "声かけと見守りで排泄できた": {
+  "domain": "排泄",
+  "score": 4.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "軽い中途覚醒あり": {
+  "domain": "睡眠",
+  "score": 4.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "摂取量は普段よりやや少なめ": {
+  "domain": "食事",
+  "score": 3.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "散歩は5分程度で終了": {
+  "domain": "運動",
+  "score": 2.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "トイレ動作の一部に介助が必要": {
+  "domain": "排泄",
+  "score": 3.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "夜間の眠りが浅く日中の眠気が強い": {
+  "domain": "睡眠",
+  "score": 2.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "入浴または排泄で介助が必要": {
+  "domain": "介助負担",
+  "score": 4.0,
+  "n": 6,
+  "source": "sample_3users"
+ },
+ "主食・副食ともに残さず摂取": {
+  "domain": "食事",
+  "score": 5.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "歩行訓練10分実施": {
+  "domain": "運動",
+  "score": 3.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "睡眠状態は良好": {
+  "domain": "睡眠",
+  "score": 5.0,
+  "n": 11,
+  "source": "sample_3users"
+ },
+ "日中は落ち着いて過ごした": {
+  "domain": "認知_意欲",
+  "score": 4.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "声かけしたが摂取量は少なかった": {
+  "domain": "食事",
+  "score": 2.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "運動は実施せず": {
+  "domain": "運動",
+  "score": 1.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "意欲低下あり": {
+  "domain": "認知_意欲",
+  "score": 2.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "夜間覚醒があり注意が必要": {
+  "domain": "リスク",
+  "score": 4.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "摂取量は概ね良好": {
+  "domain": "食事",
+  "score": 4.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "短時間の体操は問題なく実施": {
+  "domain": "運動",
+  "score": 3.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "朝食は完食": {
+  "domain": "食事",
+  "score": 5.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "傾眠や軽度の混乱に注意": {
+  "domain": "リスク",
+  "score": 3.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "活動への参加はみられなかった": {
+  "domain": "運動",
+  "score": 1.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "排泄介助あり": {
+  "domain": "排泄",
+  "score": 2.0,
+  "n": 9,
+  "source": "sample_3users"
+ },
+ "日中傾眠が目立つ": {
+  "domain": "睡眠",
+  "score": 2.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "ふらつきがあり常時見守りを要した": {
+  "domain": "介助負担",
+  "score": 5.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "夜間覚醒は1回": {
+  "domain": "睡眠",
+  "score": 4.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "表情は穏やか": {
+  "domain": "認知_意欲",
+  "score": 4.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "上肢体操に参加": {
+  "domain": "運動",
+  "score": 3.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "軽度の疲労感はあるが大きな問題なし": {
+  "domain": "リスク",
+  "score": 1.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "声かけのみで入浴できた": {
+  "domain": "入浴",
+  "score": 5.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "午前の体操と午後の散歩に参加": {
+  "domain": "運動",
+  "score": 5.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "排泄は自立": {
+  "domain": "排泄",
+  "score": 5.0,
+  "n": 9,
+  "source": "sample_3users"
+ },
+ "会話は活発": {
+  "domain": "認知_意欲",
+  "score": 5.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "介助負担は少ない": {
+  "domain": "介助負担",
+  "score": 0.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "特記事項なし": {
+  "domain": "リスク",
+  "score": 0.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "食事は十分量を摂取できている": {
+  "domain": "食事",
+  "score": 5.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "浴室内の動作は自立していた": {
+  "domain": "入浴",
+  "score": 5.0,
+  "n": 5,
+  "source": "sample_3users"
+ },
+ "体操に概ね参加できた": {
+  "domain": "運動",
+  "score": 4.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "入浴は自立して実施": {
+  "domain": "入浴",
+  "score": 5.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "歩行訓練20分実施": {
+  "domain": "運動",
+  "score": 5.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "意欲的に参加": {
+  "domain": "認知_意欲",
+  "score": 5.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "排泄は介助なく実施": {
+  "domain": "排泄",
+  "score": 5.0,
+  "n": 4,
+  "source": "sample_3users"
+ },
+ "表情明るく反応良好": {
+  "domain": "認知_意欲",
+  "score": 5.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "散歩15分実施": {
+  "domain": "運動",
+  "score": 4.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "散歩20分を安定して行った": {
+  "domain": "運動",
+  "score": 5.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "見守り不要で実施できた": {
+  "domain": "介助負担",
+  "score": 0.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "状態は安定": {
+  "domain": "リスク",
+  "score": 0.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "レクリエーション後も疲労少なく過ごした": {
+  "domain": "運動",
+  "score": 4.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "他者との交流もみられた": {
+  "domain": "認知_意欲",
+  "score": 5.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "トイレ動作は自立": {
+  "domain": "排泄",
+  "score": 5.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "排泄動作は介助下で実施": {
+  "domain": "排泄",
+  "score": 2.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "促しにより短時間参加できた": {
+  "domain": "認知_意欲",
+  "score": 3.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "主食・副食ともにほぼ食べられていた": {
+  "domain": "食事",
+  "score": 4.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "本日は清拭のみ実施": {
+  "domain": "入浴",
+  "score": 2.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "活動への参加は消極的": {
+  "domain": "認知_意欲",
+  "score": 2.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "声かけにより軽い運動を実施": {
+  "domain": "運動",
+  "score": 2.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "声かけで参加": {
+  "domain": "認知_意欲",
+  "score": 3.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "夜間覚醒後の様子を確認": {
+  "domain": "リスク",
+  "score": 3.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "6割程度の摂取にとどまった": {
+  "domain": "食事",
+  "score": 3.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "疲労感があり本日の歩行訓練は中止": {
+  "domain": "運動",
+  "score": 1.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "服薬拒否があり確認が必要": {
+  "domain": "リスク",
+  "score": 5.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "トイレ移乗に介助を要した": {
+  "domain": "排泄",
+  "score": 2.0,
+  "n": 3,
+  "source": "sample_3users"
+ },
+ "食欲低下あり": {
+  "domain": "食事",
+  "score": 2.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "会話は少なめ": {
+  "domain": "認知_意欲",
+  "score": 2.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "食事は半分程度摂取": {
+  "domain": "食事",
+  "score": 3.0,
+  "n": 2,
+  "source": "sample_3users"
+ },
+ "見守り下で活動に加われた": {
+  "domain": "認知_意欲",
+  "score": 3.0,
+  "n": 1,
+  "source": "sample_3users"
+ },
+ "数口から3割程度の摂取にとどまる": {
+  "domain": "食事",
+  "score": 1,
+  "n": 0,
+  "source": "manual",
+  "why": "worse than 少量のみ(2); 食事低下 flagged in the same record"
+ },
+ "一部介助で入浴実施": {
+  "domain": "入浴",
+  "score": 4,
+  "n": 0,
+  "source": "manual",
+  "why": "between 介助下(3) and 声かけのみ/自立(5); U005/U009 profiles say 自立または一部介助"
+ },
+ "洗体時のみ介助を要した": {
+  "domain": "入浴",
+  "score": 4,
+  "n": 0,
+  "source": "manual",
+  "why": "partial help only, same tier as 一部介助"
+ },
+ "見守りと一部介助で入浴を終えた": {
+  "domain": "入浴",
+  "score": 4,
+  "n": 0,
+  "source": "manual",
+  "why": "partial help only, same tier as 一部介助"
+ },
+ "入浴は行わず清拭で対応": {
+  "domain": "入浴",
+  "score": 2,
+  "n": 0,
+  "source": "manual",
+  "why": "清拭 = 2 in sample (本日は清拭のみ実施, 部分清拭); 注意点 never lists 入浴拒否・困難 with it"
+ },
+ "集団体操に最後まで参加": {
+  "domain": "運動",
+  "score": 5,
+  "n": 0,
+  "source": "manual",
+  "why": "full participation; 体操に概ね参加できた is 4"
+ },
+ "車椅子でホールまで移動し活動を見学": {
+  "domain": "運動",
+  "score": 1.5,
+  "n": 0,
+  "source": "manual",
+  "why": "watched only: between 不参加(1) and 短時間参加(2); no 注意点 flags to disambiguate"
+ },
+ "睡眠がやや浅い": {
+  "domain": "睡眠",
+  "score": 3.5,
+  "n": 0,
+  "source": "manual",
+  "why": "milder than 眠りが浅く日中の眠気が強い(2); 注意点 never lists 睡眠不良 with it, so >=3; 3 or 4"
+ },
+ "夜間覚醒が3回以上あり": {
+  "domain": "睡眠",
+  "score": 1.5,
+  "n": 0,
+  "source": "manual",
+  "why": "worse than 覚醒2回(3); 睡眠不良 flagged so <=2; 1 or 2"
+ },
+ "混乱があり介助困難": {
+  "domain": "介助負担",
+  "score": 5,
+  "n": 0,
+  "source": "manual",
+  "why": "same tier as 拒否があり対応に時間を要した(5); 介助負担大 flagged"
+ },
+ "必要時の声かけ程度で過ごせた": {
+  "domain": "介助負担",
+  "score": 1,
+  "n": 0,
+  "source": "manual",
+  "why": "low but not zero; U009 profile 介助負担は全体として低い"
+ },
+ "軽い確認のみで対応可能": {
+  "domain": "介助負担",
+  "score": 1,
+  "n": 0,
+  "source": "manual",
+  "why": "low but not zero"
+ },
+ "便秘傾向と睡眠状態に注意": {
+  "domain": "リスク",
+  "score": 4,
+  "n": 0,
+  "source": "manual",
+  "why": "always co-occurs with 注意点…高リスク, so >=4; treat like other 〜に注意 notes (4)"
+ },
+ "ふらつきがあり転倒に注意": {
+  "domain": "リスク",
+  "score": 4.5,
+  "n": 0,
+  "source": "manual",
+  "why": "fall warning with 高リスク flag; 4 or 5"
+ },
+ "強い拒否がみられ重点的な対応が必要": {
+  "domain": "リスク",
+  "score": 5,
+  "n": 0,
+  "source": "manual",
+  "why": "strongest wording; 服薬拒否があり確認が必要 is 5"
+ }
+}
