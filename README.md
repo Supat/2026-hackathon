@@ -25,6 +25,14 @@ python -m care_score.predict \
     --out submission
 ```
 
+## Jupyter notebook (Carnets Plus on iPad)
+
+`notebooks/care_hackathon_carnets.ipynb` is a self-contained version of the scorer
+(lexicon embedded, NumPy + pandas only). Copy the notebook together with the `data/`
+folder into *On My iPad ▸ Carnets*, open it, and **Run All**. It refits the fallback
+regression from the sample, checks against the sample ground truth, and writes the same
+three CSVs into `submission/` next to the notebook.
+
 ## How it works
 
 The records are template-generated. Each day is a 「。」-separated list of sentences whose
@@ -55,5 +63,6 @@ On the 3 sample users the pipeline reproduces the 2-week means with MAE 0.010
 data/sample_3users/   sample input + ground truth (from the hackathon site)
 data/test_7users/     event-day input (7 users, no ground truth)
 care_score/           build_lexicon.py, lexicon.json, predict.py, evaluate.py
+notebooks/            care_hackathon_carnets.ipynb (self-contained, for Carnets Plus)
 submission/           generated predictions
 ```
