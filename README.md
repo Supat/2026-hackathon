@@ -40,10 +40,12 @@ first six slots are always 食事 → 入浴 → 運動 → 排泄 → 睡眠 �
 介助負担 / リスク note / 「注意点として、…がみられる」 sentences. In the 3-user sample every
 sentence maps to exactly one score, so:
 
-1. **Lexicon lookup** (`care_score/lexicon.json`, 112 sentences). 94 entries are derived
-   automatically from the sample ground truth; 18 sentences that only appear in the 7-user
-   test set are mapped by hand in `build_lexicon.py` (`MANUAL_ENTRIES`, each with a rationale).
-   Genuinely ambiguous ones carry a fractional expected score (e.g. 睡眠がやや浅い → 3.5).
+1. **Lexicon lookup** (`care_score/lexicon.json`, 112 sentences). 97 entries are derived
+   automatically from the sample ground truth; 15 sentences that only appear in the 7-user
+   test set are mapped by hand in `build_lexicon.py` (`MANUAL_ENTRIES`, each with a rationale),
+   or by a local LLM (see below). Genuinely ambiguous ones carry a fractional expected score
+   (e.g. 睡眠がやや浅い → 3.5). The 3 test-only 「注意点として…」 variants need no entry; they
+   are parsed structurally.
 2. **介助負担 / リスク fallback.** Days without an explicit 介助負担 sentence get a linear
    regression on the six domain scores, clipped to 0–3 (in the sample, 介助負担 ≥ 4 always
    comes with a sentence). Days without a リスク note are clipped to 0–2 for the same reason.
@@ -57,12 +59,42 @@ sentence maps to exactly one score, so:
 On the 3 sample users the pipeline reproduces the 2-week means with MAE 0.010
 (the six domain scores exactly; the residual comes from sentence-less 介助負担/リスク days).
 
+## Optional: score the unknown sentences with a local LLM (Mac + Ollama)
+
+`care_score/llm_lexicon.py` replaces the hand-mapped table with answers from a local model.
+It is an offline step: it writes into `lexicon.json`, and the predictor / notebook never call
+a model. Each unknown sentence is sent with its domain's full tier ladder from the sample, the
+relevant 利用者特徴 profiles, and the hard bounds implied by that day's 注意点 flags; several
+votes are averaged (midpoint of a low..high answer), then clipped to the bounds.
+
+```bash
+brew install ollama && ollama serve &          # once
+ollama pull qwen2.5:14b                        # ~9 GB; qwen2.5:7b also works, elyza/swallow for Japanese-tuned
+pip install -r requirements.txt
+
+# 1) how well does the model recover the sample's own scale? (each sentence hidden from its ladder)
+python -m care_score.llm_lexicon --models qwen2.5:14b --validate
+
+# 2) dry run: LLM vs hand-mapped score for the 15 test-only sentences
+python -m care_score.llm_lexicon --models qwen2.5:14b
+
+# 3) write into lexicon.json (hand-mapped values are kept as `manual` for reference), then re-predict
+python -m care_score.llm_lexicon --models qwen2.5:14b,qwen2.5:7b --votes 3 --write
+python -m care_score.evaluate
+python -m care_score.predict --records data/test_7users/care_hackathon_student_records_7users_14days.csv \
+    --summaries data/test_7users/care_hackathon_2week_summaries_7users.csv --out submission
+```
+
+Answers are cached in `care_score/llm_cache.json`. `python -m care_score.build_lexicon` restores
+the hand-mapped lexicon. To use an LLM-scored lexicon on the iPad, copy `lexicon.json` next to the
+notebook; it is picked up automatically.
+
 ## Layout
 
 ```
 data/sample_3users/   sample input + ground truth (from the hackathon site)
 data/test_7users/     event-day input (7 users, no ground truth)
-care_score/           build_lexicon.py, lexicon.json, predict.py, evaluate.py
+care_score/           build_lexicon.py, lexicon.json, predict.py, evaluate.py, llm_lexicon.py
 notebooks/            care_hackathon_carnets.ipynb (self-contained, for Carnets Plus)
 submission/           generated predictions
 ```
