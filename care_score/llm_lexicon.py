@@ -118,9 +118,20 @@ def collect_unknown(records: list[dict], lexicon: dict, summaries: dict[str, dic
         for i, s in enumerate(sents):
             if i == 0 or s in lexicon or FLAG_RE.match(s):
                 continue
-            d = info.setdefault(s, {"slots": set(), "profiles": set(), "bounds": {}, "n": 0})
+            d = info.setdefault(s, {"slots": set(), "profiles": set(), "bounds": {}, "n": 0,
+                                    "allowed": {"介助負担", "リスク"}})
             d["n"] += 1
             d["slots"].add(i)
+            if i >= 7:
+                # slot-order rule: in the sample the trailing sentences are always 介助負担 then リスク,
+                # so a known 介助負担 sentence before this one, or a known リスク sentence after it,
+                # pins the domain.
+                before = {lexicon[t]["domain"] for t in sents[7:i] if t in lexicon}
+                after = {lexicon[t]["domain"] for t in sents[i + 1:] if t in lexicon}
+                if "介助負担" in before:
+                    d["allowed"] &= {"リスク"}
+                if "リスク" in after:
+                    d["allowed"] &= {"介助負担"}
             prof = summaries.get(r["利用者ID"], {}).get("利用者特徴") or r.get("利用者特徴")
             if prof:
                 d["profiles"].add(f"{r['利用者ID']}: {prof}")
@@ -134,7 +145,9 @@ def collect_unknown(records: list[dict], lexicon: dict, summaries: dict[str, dic
                         lo, hi = (max(lo, thr + 1), hi) if op == "<=" else (lo, min(hi, thr - 1))
                     d["bounds"][dom] = (lo, hi)
     for s, d in info.items():
-        d["domains"] = sorted({DOMAINS[i - 1] for i in d["slots"] if 1 <= i <= 6}) or ["介助負担", "リスク"]
+        d["domains"] = (sorted({DOMAINS[i - 1] for i in d["slots"] if 1 <= i <= 6})
+                        or sorted(d["allowed"]) or ["介助負担", "リスク"])
+        d.pop("allowed", None)
         d["bounds"] = {k: v for k, v in d["bounds"].items() if v[0] <= v[1]}   # drop contradictory bounds
     return info
 
@@ -156,31 +169,95 @@ SYSTEM = (
 )
 
 
+def ladder_tiers(lexicon: dict, domain: str, hide: str | None = None) -> list[float]:
+    """Ascending list of the score tiers that have at least one sample sentence."""
+    return sorted({v["score"] for s, v in lexicon.items()
+                   if v["domain"] == domain and v.get("source") == "sample_3users" and s != hide})
+
+
+def fmt_tier(t: float) -> str:
+    return str(int(t)) if float(t).is_integer() else str(t)
+
+
+# one line per domain on what the scale measures, so the ordinal comparison is made on the right axis
+DOMAIN_NOTES = {
+    "食事": "摂取量の多さで判定する（多いほど高い）。",
+    "入浴": "介助の少なさ＝自立度で判定する（自立5 ＞ 見守り・一部介助 ＞ 全面的な介助 ＞ 清拭のみ ＞ 未実施）。",
+    "運動": "本人が実際に行った身体活動の量で判定する。見学・同席・移動介助は本人の活動に含めない。",
+    "排泄": "介助の少なさ＝自立度で判定する。",
+    "睡眠": "睡眠の質の良さで判定する（覚醒が少ないほど高い）。",
+    "認知_意欲": "意欲・反応・見当識の良さで判定する。",
+    "介助負担": "職員側の負担の大きさで判定する（大きいほど高い）。",
+    "リスク": "注意・観察を要する度合いで判定する（高いほど高い）。",
+}
+
+
 def make_prompt(sentence: str, ctx: dict, lexicon: dict, hide: str | None = None) -> str:
     parts = ["【課題】次の介護記録の1文に対して、該当する項目とスコアを判定してください。", "", "【対象文】", sentence, ""]
     parts.append("【候補となる項目】" + "、".join(DOMAIN_JA[d] for d in ctx["domains"]))
     parts.append("")
     parts.append("【尺度の例（3名分の正解データより。数字はスコア、右はそのスコアが付いた文）】")
     for d in ctx["domains"]:
-        parts.append(f"■ {DOMAIN_JA[d]}")
+        parts.append(f"■ {DOMAIN_JA[d]}　※{DOMAIN_NOTES[d]}")
         parts.append(ladder_text(lexicon, d, hide) or "  （例なし）")
     if ctx.get("profiles"):
         parts += ["", "【この文が現れた利用者の特徴】"] + [f"  - {p}" for p in sorted(ctx["profiles"])]
     bounds = {d: b for d, b in ctx.get("bounds", {}).items() if d in ctx["domains"] and b != (0, 5)}
     if bounds:
         parts += ["", "【同日の注意点フラグから確定している範囲】"] + [f"  - {DOMAIN_JA[d]}: {lo}〜{hi}" for d, (lo, hi) in bounds.items()]
+    tiers = {d: ladder_tiers(lexicon, d, hide) for d in ctx["domains"]}
+    comp_example = ", ".join(f'"{fmt_tier(t)}": "<高い|同等|低い>"' for t in tiers[ctx["domains"][0]])
     parts += [
         "",
+        "【手順】まず項目を決め、その項目の尺度の例を段階ごとに対象文と比較してください。",
+        "対象文の状態が、その段階の例文より良い（スコアが高い側）なら「高い」、同程度なら「同等」、"
+        "悪い（スコアが低い側）なら「低い」と答えます。例にない段階は、上下の比較結果から自動的に決まります"
+        "（例：3の例より高く、5の例より低い → 4）。",
+        "",
         "【回答形式】以下のキーを持つJSONのみを返してください。",
-        '{"domain": "<' + "|".join(ctx["domains"]) + '>", "score_low": <整数>, "score_high": <整数>, "reason": "<日本語で1文>"}',
-        "score_low と score_high は同じ値でも構いません。2つの段階のどちらか判断がつかない場合のみ幅を持たせてください。",
-        "尺度の例に同じ意味の文があれば、そのスコアに合わせてください。例にない段階（例：入浴の4）も選べます。",
+        '{"domain": "<' + "|".join(ctx["domains"]) + '>", "comparison": {' + comp_example + '}, '
+        '"score_low": <整数>, "score_high": <整数>, "reason": "<日本語で1文>"}',
+        "comparison のキーは選んだ項目の尺度に現れる段階（" + "／".join(
+            f"{d}: {', '.join(fmt_tier(t) for t in tiers[d])}" for d in ctx["domains"]) + "）をすべて含めてください。",
+        "score_low / score_high は comparison から導いたスコア（同じ値でも構いません）。",
     ]
     return "\n".join(parts)
 
 
 # --------------------------------------------------------------------------- scoring
-def parse_answer(text: str, allowed: list[str]) -> tuple[str, float, float, str]:
+def ordinal_score(comparison: dict, tiers: list[float]) -> float | None:
+    """Turn per-tier 高い/同等/低い judgements into a score; None if missing or inconsistent."""
+    if not comparison or not tiers:
+        return None
+    verdict = {}
+    for k, v in comparison.items():
+        try:
+            t = float(k)
+        except (TypeError, ValueError):
+            continue
+        v = str(v)
+        verdict[t] = "eq" if "同等" in v else "up" if "高" in v else "down" if "低" in v else None
+    if any(verdict.get(t) is None for t in tiers):
+        return None
+    eq = [t for t in tiers if verdict[t] == "eq"]
+    if eq:
+        return statistics.fmean(eq)
+    above = [t for t in tiers if verdict[t] == "up"]      # sentence is better than these tiers
+    below = [t for t in tiers if verdict[t] == "down"]    # sentence is worse than these tiers
+    a = max(above) if above else None
+    b = min(below) if below else None
+    if a is not None and b is not None and a >= b:
+        return None                                        # non-monotone answer
+    if a is None:
+        return max(b - 1, 0.0)
+    if b is None:
+        return min(a + 1, 5.0)
+    between = [t for t in range(int(a) + 1, int(b)) if a < t < b]
+    return statistics.fmean(between) if between else (a + b) / 2
+
+
+def parse_answer(text: str, allowed: list[str], tiers: dict[str, list[float]] | None = None
+                 ) -> tuple[str, float, float, str]:
     m = re.search(r"\{.*\}", text, re.S)
     obj = json.loads(m.group(0) if m else text)
     dom = str(obj.get("domain", "")).replace("・", "_").replace("認知意欲", "認知_意欲")
@@ -189,6 +266,12 @@ def parse_answer(text: str, allowed: list[str]) -> tuple[str, float, float, str]
     lo = float(obj.get("score_low", obj.get("score", 3)))
     hi = float(obj.get("score_high", lo))
     lo, hi = min(lo, hi), max(lo, hi)
+    ordinal = ordinal_score(obj.get("comparison"), (tiers or {}).get(dom, []))
+    # The comparisons decide, unless they contradict the model's own score by more than a tier:
+    # models sometimes fill the table with the direction reversed ("高い" = the example is higher),
+    # and then the reason/score are the reliable part of the answer.
+    if ordinal is not None and abs(ordinal - (lo + hi) / 2) <= 1:
+        lo = hi = ordinal
     return dom, max(0, min(5, lo)), max(0, min(5, hi)), str(obj.get("reason", ""))
 
 
@@ -202,6 +285,7 @@ def cache_key(client, k: int, temp: float, prompt: str, sentence: str) -> str:
 def score_sentence(sentence: str, ctx: dict, lexicon: dict, clients: list, votes: int, cache: dict,
                    hide: str | None = None) -> dict:
     prompt = make_prompt(sentence, ctx, lexicon, hide)
+    tiers = {d: ladder_tiers(lexicon, d, hide) for d in ctx["domains"]}
     answers = []
     for client in clients:
         for k in range(votes):
@@ -211,7 +295,7 @@ def score_sentence(sentence: str, ctx: dict, lexicon: dict, clients: list, votes
                 raw = client.chat(SYSTEM, prompt, seed=k + 1, temperature=temp)
                 cache[key] = raw
             try:
-                answers.append(parse_answer(cache[key], ctx["domains"]))
+                answers.append(parse_answer(cache[key], ctx["domains"], tiers))
             except (ValueError, json.JSONDecodeError) as e:
                 print(f"  unparseable answer from {client} for {sentence!r}: {e}", file=sys.stderr)
     if not answers:
